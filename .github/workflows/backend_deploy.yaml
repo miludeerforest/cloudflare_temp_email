@@ -3,18 +3,10 @@ name: Deploy Backend
 on:
   workflow_call:
     inputs:
-      ref:
-        description: "Immutable commit SHA or ref to deploy"
-        required: false
+      sha:
+        description: "Full 40-character commit SHA to deploy"
+        required: true
         type: string
-        default: ""
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: "Commit SHA or ref to deploy"
-        required: false
-        type: string
-        default: ""
 
 jobs:
   deploy:
@@ -25,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.ref || github.sha }}
+          ref: ${{ inputs.sha }}
 
       - name: Install Node.js
         uses: actions/setup-node@v6

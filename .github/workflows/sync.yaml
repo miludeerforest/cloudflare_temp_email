@@ -18,42 +18,39 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.repository.fork }}
     outputs:
-      changed: ${{ steps.sync.outputs.changed }}
-      before_sha: ${{ steps.sync.outputs.before_sha }}
+      needs_deploy: ${{ steps.sync.outputs.needs_deploy }}
       after_sha: ${{ steps.sync.outputs.after_sha }}
+      deployed_sha: ${{ steps.sync.outputs.deployed_sha }}
     steps:
-      - name: Read current main SHA
-        id: before
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -Eeuo pipefail
-          echo "sha=$(gh api repos/${{ github.repository }}/git/ref/heads/main --jq '.object.sha')" >> "$GITHUB_OUTPUT"
-
       - name: Sync upstream changes
         id: sync
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BEFORE_SHA: ${{ steps.before.outputs.sha }}
         run: |
           set -Eeuo pipefail
           gh repo sync "${{ github.repository }}" --source dreamhunter2333/cloudflare_temp_email --branch main
           AFTER_SHA="$(gh api repos/${{ github.repository }}/git/ref/heads/main --jq '.object.sha')"
-          echo "before_sha=$BEFORE_SHA" >> "$GITHUB_OUTPUT"
-          echo "after_sha=$AFTER_SHA" >> "$GITHUB_OUTPUT"
-          if [[ "$BEFORE_SHA" == "$AFTER_SHA" ]]; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Upstream sync was a no-op at $AFTER_SHA"
+          DEPLOYED_SHA=""
+          if DEPLOYED_SHA="$(gh api repos/${{ github.repository }}/git/ref/heads/production-deployed --jq '.object.sha' 2>/dev/null)"; then
+            echo "Last deployed SHA: $DEPLOYED_SHA"
           else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Upstream changed main from $BEFORE_SHA to $AFTER_SHA"
+            echo "production-deployed ref does not exist yet"
+          fi
+          echo "after_sha=$AFTER_SHA" >> "$GITHUB_OUTPUT"
+          echo "deployed_sha=$DEPLOYED_SHA" >> "$GITHUB_OUTPUT"
+          if [[ -z "$DEPLOYED_SHA" || "$AFTER_SHA" != "$DEPLOYED_SHA" ]]; then
+            echo "needs_deploy=true" >> "$GITHUB_OUTPUT"
+            echo "Deployment is required for $AFTER_SHA"
+          else
+            echo "needs_deploy=false" >> "$GITHUB_OUTPUT"
+            echo "Main is already deployed at $AFTER_SHA"
           fi
 
   deploy:
     name: Deploy synced revision
     needs: sync_latest_from_upstream
-    if: ${{ needs.sync_latest_from_upstream.outputs.changed == 'true' }}
+    if: ${{ needs.sync_latest_from_upstream.outputs.needs_deploy == 'true' }}
     uses: ./.github/workflows/deploy.yaml
     with:
-      ref: ${{ needs.sync_latest_from_upstream.outputs.after_sha }}
+      sha: ${{ needs.sync_latest_from_upstream.outputs.after_sha }}
     secrets: inherit

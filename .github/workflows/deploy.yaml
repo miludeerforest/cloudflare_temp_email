@@ -6,35 +6,87 @@ on:
       - "*"
   workflow_dispatch:
     inputs:
-      ref:
-        description: "Commit SHA or ref to deploy (defaults to the workflow SHA)"
+      sha:
+        description: "Full 40-character commit SHA to deploy (defaults to the workflow SHA)"
         required: false
         type: string
         default: ""
   workflow_call:
     inputs:
-      ref:
-        description: "Immutable commit SHA or ref to deploy"
-        required: false
+      sha:
+        description: "Full 40-character commit SHA to deploy"
+        required: true
         type: string
-        default: ""
+
+permissions:
+  contents: write
 
 concurrency:
   group: cf-temp-email-production
   cancel-in-progress: false
 
 jobs:
+  validate:
+    name: Validate deployment SHA
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.validate.outputs.sha }}
+    steps:
+      - name: Validate commit SHA
+        id: validate
+        env:
+          REQUESTED_SHA: ${{ inputs.sha || github.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          if [[ ! "$REQUESTED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Deployment input must be a full 40-character lowercase commit SHA" >&2
+            exit 1
+          fi
+          RESOLVED_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${REQUESTED_SHA}" --jq '.sha')"
+          if [[ "$RESOLVED_SHA" != "$REQUESTED_SHA" ]]; then
+            echo "GitHub resolved a different commit: $RESOLVED_SHA" >&2
+            exit 1
+          fi
+          echo "sha=$RESOLVED_SHA" >> "$GITHUB_OUTPUT"
+          echo "Deploying immutable commit $RESOLVED_SHA"
+
   backend:
     name: Deploy Backend
+    needs: validate
     uses: ./.github/workflows/backend_deploy.yaml
     with:
-      ref: ${{ inputs.ref || github.sha }}
+      sha: ${{ needs.validate.outputs.sha }}
     secrets: inherit
 
   frontend:
     name: Deploy Frontend
-    needs: backend
+    needs: [validate, backend]
     uses: ./.github/workflows/frontend_pagefunction_deploy.yaml
     with:
-      ref: ${{ inputs.ref || github.sha }}
+      sha: ${{ needs.validate.outputs.sha }}
     secrets: inherit
+
+  mark-deployed:
+    name: Mark deployed SHA
+    needs: [validate, backend, frontend]
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DEPLOY_SHA: ${{ needs.validate.outputs.sha }}
+    steps:
+      - name: Update production-deployed ref
+        run: |
+          set -Eeuo pipefail
+          REF_URL="repos/${GITHUB_REPOSITORY}/git/ref/heads/production-deployed"
+          if gh api "$REF_URL" >/dev/null 2>&1; then
+            gh api --method PATCH "$REF_URL" \
+              -f "sha=$DEPLOY_SHA" \
+              -F force=true >/dev/null
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+              -f ref=refs/heads/production-deployed \
+              -f "sha=$DEPLOY_SHA" >/dev/null
+          fi
+          echo "production-deployed now points to $DEPLOY_SHA"
