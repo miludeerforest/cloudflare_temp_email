@@ -1,9 +1,8 @@
 name: Deploy Frontend with page function
 
 on:
-  workflow_run:
-    workflows: [Upstream Sync]
-    types: [completed]
+  repository_dispatch:
+    types: [upstream-synced]
   push:
     tags:
       - "*"
@@ -15,7 +14,6 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,11 +33,9 @@ jobs:
       - name: Deploy Frontend for ${{ github.ref_name }}
         run: |
           cd frontend/
-          pnpm install --no-frozen-lockfile
+          pnpm install --frozen-lockfile
           pnpm build:pages
-          cd ../pages/
-          pnpm install --no-frozen-lockfile
-          pnpm run deploy
+          pnpm exec wrangler pages deploy --config ../pages/wrangler.toml --branch production
           echo "Deployed production for ref ${{ github.ref_name }}"
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

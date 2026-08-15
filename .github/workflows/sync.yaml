@@ -9,14 +9,55 @@ concurrency:
   group: upstream-sync
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 jobs:
   sync_latest_from_upstream:
     name: Sync latest commits from upstream repo
     runs-on: ubuntu-latest
     if: ${{ github.event.repository.fork }}
-
+    outputs:
+      changed: ${{ steps.sync.outputs.changed }}
+      before_sha: ${{ steps.sync.outputs.before_sha }}
+      after_sha: ${{ steps.sync.outputs.after_sha }}
     steps:
-      - name: Sync upstream changes
-        run: gh repo sync ${{ github.repository }} --source dreamhunter2333/cloudflare_temp_email --branch main
+      - name: Read current main SHA
+        id: before
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -Eeuo pipefail
+          echo "sha=$(gh api repos/${{ github.repository }}/git/ref/heads/main --jq '.object.sha')" >> "$GITHUB_OUTPUT"
+
+      - name: Sync upstream changes
+        id: sync
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BEFORE_SHA: ${{ steps.before.outputs.sha }}
+        run: |
+          set -Eeuo pipefail
+          gh repo sync "${{ github.repository }}" --source dreamhunter2333/cloudflare_temp_email --branch main
+          AFTER_SHA="$(gh api repos/${{ github.repository }}/git/ref/heads/main --jq '.object.sha')"
+          echo "before_sha=$BEFORE_SHA" >> "$GITHUB_OUTPUT"
+          echo "after_sha=$AFTER_SHA" >> "$GITHUB_OUTPUT"
+          if [[ "$BEFORE_SHA" == "$AFTER_SHA" ]]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Upstream sync was a no-op at $AFTER_SHA"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Upstream changed main from $BEFORE_SHA to $AFTER_SHA"
+          fi
+
+      - name: Trigger deployments after upstream change
+        if: steps.sync.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          BEFORE_SHA: ${{ steps.sync.outputs.before_sha }}
+          AFTER_SHA: ${{ steps.sync.outputs.after_sha }}
+        run: |
+          set -Eeuo pipefail
+          gh api --method POST "repos/${{ github.repository }}/dispatches" \
+            -f event_type=upstream-synced \
+            -f "client_payload[before_sha]=$BEFORE_SHA" \
+            -f "client_payload[after_sha]=$AFTER_SHA"

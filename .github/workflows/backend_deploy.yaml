@@ -1,9 +1,8 @@
 name: Deploy Backend
 
 on:
-  workflow_run:
-    workflows: [Upstream Sync]
-    types: [completed]
+  repository_dispatch:
+    types: [upstream-synced]
   push:
     tags:
       - "*"
@@ -11,7 +10,6 @@ on:
 
 jobs:
   deploy:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
