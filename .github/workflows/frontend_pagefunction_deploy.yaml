@@ -35,7 +35,8 @@ jobs:
           cd frontend/
           pnpm install --frozen-lockfile
           pnpm build:pages
-          pnpm exec wrangler pages deploy --config ../pages/wrangler.toml --branch production
+          cd ../pages/
+          ../frontend/node_modules/.bin/wrangler pages deploy --branch production
           echo "Deployed production for ref ${{ github.ref_name }}"
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
