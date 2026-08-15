@@ -49,15 +49,11 @@ jobs:
             echo "Upstream changed main from $BEFORE_SHA to $AFTER_SHA"
           fi
 
-      - name: Trigger deployments after upstream change
-        if: steps.sync.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
-          BEFORE_SHA: ${{ steps.sync.outputs.before_sha }}
-          AFTER_SHA: ${{ steps.sync.outputs.after_sha }}
-        run: |
-          set -Eeuo pipefail
-          gh api --method POST "repos/${{ github.repository }}/dispatches" \
-            -f event_type=upstream-synced \
-            -f "client_payload[before_sha]=$BEFORE_SHA" \
-            -f "client_payload[after_sha]=$AFTER_SHA"
+  deploy:
+    name: Deploy synced revision
+    needs: sync_latest_from_upstream
+    if: ${{ needs.sync_latest_from_upstream.outputs.changed == 'true' }}
+    uses: ./.github/workflows/deploy.yaml
+    with:
+      ref: ${{ needs.sync_latest_from_upstream.outputs.after_sha }}
+    secrets: inherit

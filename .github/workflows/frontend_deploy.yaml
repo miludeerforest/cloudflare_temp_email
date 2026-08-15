@@ -18,7 +18,7 @@ jobs:
       - uses: pnpm/action-setup@v5
         name: Install pnpm
         with:
-          version: 10
+          version: 10.10.0
           run_install: false
 
       - name: Deploy Frontend for ${{ github.ref_name }}
@@ -55,7 +55,7 @@ jobs:
       - uses: pnpm/action-setup@v5
         name: Install pnpm
         with:
-          version: 10
+          version: 10.10.0
           run_install: false
 
       - name: Deploy Telegram Frontend for ${{ github.ref_name }}

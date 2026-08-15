@@ -1,12 +1,20 @@
 name: Deploy Backend
 
 on:
-  repository_dispatch:
-    types: [upstream-synced]
-  push:
-    tags:
-      - "*"
+  workflow_call:
+    inputs:
+      ref:
+        description: "Immutable commit SHA or ref to deploy"
+        required: false
+        type: string
+        default: ""
   workflow_dispatch:
+    inputs:
+      ref:
+        description: "Commit SHA or ref to deploy"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   deploy:
@@ -16,6 +24,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.sha }}
 
       - name: Install Node.js
         uses: actions/setup-node@v6
@@ -26,7 +36,7 @@ jobs:
         name: Install pnpm
         id: pnpm-install
         with:
-          version: 10
+          version: 10.10.0
           run_install: false
 
       - name: Deploy Backend for ${{ github.ref_name }}
