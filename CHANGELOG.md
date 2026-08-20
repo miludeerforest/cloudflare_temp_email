@@ -6,13 +6,35 @@
   <a href="CHANGELOG_EN.md">English</a>
 </p>
 
-## v1.11.0(main)
+## v1.12.0(main)
 
 ### Features
 
+- feat: |Admin| 数据库页面新增 D1 存储容量展示，支持选择并保存 Free 或 Workers Paid 套餐，对比当前数据库大小和容量上限
+
 ### Bug Fixes
 
+- fix: |Admin| 修复切换一级标签页时二级标签页偶发无选中项、内容不显示及指示条偏移的问题
+
 ### Improvements
+
+### Testing
+
+- test: |E2E| 覆盖 D1 数据库大小响应、配置键隔离，以及数据库页面套餐选择的持久化与刷新恢复
+
+## v1.11.0
+
+### Features
+
+- feat: |Frontend| 在随机子域名允许范围内新增普通、随机和自定义子域名模式选择（issue #1108）
+
+### Bug Fixes
+
+- fix: |Frontend| 将邮箱主页的账户设置、删除账户等表述更正为邮箱地址操作，并明确发信权限与额度按当前邮箱地址独立管理
+
+### Improvements
+
+- docs: |发送邮件| 补充用户账号、邮箱地址和发信权限的概念区别及按当前地址申请权限的操作说明
 
 - fix: |Worker| 地址活跃时间保活增加 1 天写入窗口，用户设置和邮箱访问不再重复更新近期活跃地址，降低 D1 写入量（issue #1103）
 
