@@ -15,12 +15,16 @@
 ### Bug Fixes
 
 - fix: |Admin| Fix secondary tabs occasionally losing their active item, hiding content, and leaving the indicator offset after switching primary tabs
+- fix: |Send Mail| Use a consistent address/name field order and align the empty content editor caret with its placeholder
 
 ### Improvements
+
+- feat: |Send Mail| Improve the information hierarchy and responsive layout of the user and Admin composers, with a content-format toolbar, draft status, bottom send-action area, and isolated HTML preview
 
 ### Testing
 
 - test: |E2E| Cover the D1 database-size response, config-key isolation, and persistence of the database-page plan selection across reloads
+- fix: |E2E| Cover draft editing, content-format switching, and HTML preview in the send-mail composer
 
 ## v1.11.0
 
