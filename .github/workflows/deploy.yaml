@@ -76,19 +76,17 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       DEPLOY_SHA: ${{ needs.validate.outputs.sha }}
     steps:
-      - name: Update production-deployed ref
-        run: |
-          set -Eeuo pipefail
+         - name: Update production-deployed ref                                                                                                                                  
+           run: |                                                                                                                                                                
+             set -Eeuo pipefail                                                                                                                                                  
+                                                                                                                                                                                 
              GET_REF_URL="repos/${GITHUB_REPOSITORY}/git/ref/heads/production-deployed"                                                                                          
              UPDATE_REF_URL="repos/${GITHUB_REPOSITORY}/git/refs/heads/production-deployed"                                                                                      
                                                                                                                                                                                  
              if gh api "$GET_REF_URL" >/dev/null 2>&1; then                                                                                                                      
-               gh api --method PATCH "$UPDATE_REF_URL" \                                                                                                                         
-                 -f "sha=$DEPLOY_SHA" \                                                                                                                                          
-                 -F force=true >/dev/null
-          else
-            gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
-              -f ref=refs/heads/production-deployed \
-              -f "sha=$DEPLOY_SHA" >/dev/null
-          fi
-          echo "production-deployed now points to $DEPLOY_SHA"
+               gh api --method PATCH "$UPDATE_REF_URL" -f "sha=$DEPLOY_SHA" -F force=true >/dev/null                                                                             
+             else                                                                                                                                                                
+               gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" -f ref=refs/heads/production-deployed -f "sha=$DEPLOY_SHA" >/dev/null                                  
+             fi                                                                                                                                                                  
+                                                                                                                                                                                 
+             echo "production-deployed now points to $DEPLOY_SHA
