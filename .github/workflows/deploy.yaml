@@ -89,4 +89,4 @@ jobs:
                gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" -f ref=refs/heads/production-deployed -f "sha=$DEPLOY_SHA" >/dev/null                                  
              fi                                                                                                                                                                  
                                                                                                                                                                                  
-             echo "production-deployed now points to $DEPLOY_SHA
+             echo "production-deployed now points to $DEPLOY_SHA"
