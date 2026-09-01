@@ -10,6 +10,7 @@
 
 ### Features
 
+- feat: |Mail| Add optional read/unread status with click-to-read and manual status switching
 - feat: |Admin| Add D1 storage capacity details to the database page, with persistent Free and Workers Paid plan selection and a comparison between the current database size and capacity limit
 - feat: |Admin| Add one-click random email-name generation to the address creation page (issue #1126)
 - feat: |User| Add mail composition, inbox-style sent-item filtering by bound address, and the shared address-credentials dialog to the user center, backed by User JWT APIs for address settings, send-access requests, sending, and sent-item management
@@ -22,6 +23,7 @@
 
 ### Improvements
 
+- fix: |Frontend| Unify core mailbox, email-address, user-account, and Admin Console terminology, and fill missing additional-locale strings for mail status and remote images (issue #1129)
 - feat: |Send Mail| Improve the information hierarchy and responsive layout of the user and Admin composers, with a content-format toolbar, draft status, bottom send-action area, and isolated HTML preview
 
 ### Testing
