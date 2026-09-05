@@ -10,6 +10,7 @@
 
 ### Features
 
+- feat: |Frontend| 新增 `VITE_DEFAULT_LANG` 构建变量，并支持通过 `index.html` 运行时配置覆盖前端设置
 - feat: |邮件| 新增可选的已读/未读状态，支持点击邮件自动已读和手动切换状态
 - feat: |Admin| 数据库页面新增 D1 存储容量展示，支持选择并保存 Free 或 Workers Paid 套餐，对比当前数据库大小和容量上限
 - feat: |Admin| 创建邮箱页面支持一键生成随机邮箱名称（issue #1126）
@@ -18,6 +19,8 @@
 
 ### Bug Fixes
 
+- fix: |Frontend| 修复 AdSense 脚本包含不受支持的 `data-onload` 和 `data-onerror` 属性
+- fix: |Admin| 修复权限设置加载完成前短暂显示管理员密码输入框的问题
 - fix: |Admin| 修复切换一级标签页时二级标签页偶发无选中项、内容不显示及指示条偏移的问题
 - fix: |发信页面| 统一邮箱与名称字段顺序，并修复空正文输入框的光标与占位文字错位
 - fix: |用户发信| 用户地址发信接口支持角色无限额度
