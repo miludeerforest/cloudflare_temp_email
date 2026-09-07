@@ -38,6 +38,7 @@
 | `MIN_ADDRESS_LEN`                     | 数字      | `邮箱名称` 的最小长度                                                                                                             | `1`                                       |
 | `MAX_ADDRESS_LEN`                     | 数字      | `邮箱名称` 的最大长度                                                                                                             | `30`                                      |
 | `DISABLE_CUSTOM_ADDRESS_NAME`         | 文本/JSON | 禁用自定义邮箱地址名称，如果设置为 true，则用户无法输入自定义邮箱名称，将由后台自动生成                                           | `true`                                    |
+| `DISABLE_ADDRESS_UPDATED_AT` | 文本/JSON | 默认 `false`。设为 `true` 时停止单地址及用户批量的主动保活刷新，并禁用内置手动和定时不活跃地址清理。地址初始时间、密码操作及其他清理规则不变 | `true` |
 | `ADDRESS_CHECK_REGEX`                 | 文本      | `邮箱名称` 的正则表达式, 只用于检查                                                                                               | `^(?!.*admin).*`                          |
 | `ADDRESS_REGEX`                       | 文本      | `邮箱名称` 替换非法符号的正则表达式, 不在其中的符号将被替换，如果不设置，默认为 `[^a-z0-9]`, 需谨慎使用, 有些符号可能导致无法收件 | `[^a-z0-9]`                               |
 | `DEFAULT_DOMAINS`                     | JSON      | 默认用户可用的域名(未登录或未分配角色的用户)                                                                                      | `["awsl.uk", "dreamhunter2333.xyz"]`      |
