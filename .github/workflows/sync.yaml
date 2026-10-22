@@ -25,7 +25,7 @@ jobs:
       - name: Sync upstream changes
         id: sync
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
         run: |
           set -Eeuo pipefail
           gh repo sync "${{ github.repository }}" --source dreamhunter2333/cloudflare_temp_email --branch main

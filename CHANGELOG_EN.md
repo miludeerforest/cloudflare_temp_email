@@ -16,6 +16,7 @@
 
 ### Bug Fixes
 
+- fix: |Auto Update| Use `SYNC_TOKEN` with repository contents and workflow write permissions for upstream sync so workflow changes are not blocked by the default token; preserve deployment by the synchronized commit SHA
 - fix: |Mail| Check the SMTP envelope sender and every From email address against sender blacklists; parse addresses independently so body parsing failures or multiple From addresses cannot skip matching; preserve envelope checks on address parsing errors
 - fix: |AI Extract| In `ai` mode, an address allowlist miss now skips only the Workers AI call and still falls back to local verification-code extraction
 - fix: |Telegram| Fall back to HTML-to-text conversion when plain text body is empty, preventing "parse failed" messages in Telegram notifications
