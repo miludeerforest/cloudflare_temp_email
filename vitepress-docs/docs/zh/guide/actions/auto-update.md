@@ -10,3 +10,4 @@
 3. 打开仓库的 `Actions` 页面，找到 `Upstream Sync`，启用后点击 `Run workflow`。同步成功后，现有流程会按同步后的提交 SHA 部署前后端，并记录成功部署的版本。
 4. 如果上游包含 workflow 文件变更，默认 `GITHUB_TOKEN` 无法替代此同步令牌；Cloudflare API Token 也不能提供 GitHub 同步权限。失败时先检查同步日志、`SYNC_TOKEN` 的有效期及仓库授权，不要强制覆盖 Fork 的改动。
 5. 修改 `Upstream Sync` 的 `schedule` 配置可自定义更新间隔，参考 [cron 表达式](https://crontab.guru/)
+6. `Deploy Production` 的标签推送入口仅匹配 `v*` 应用版本标签，`mail-parser-wasm-v*` 包发布标签不会触发应用部署；同步后的调用入口和手动部署入口保持不变。
